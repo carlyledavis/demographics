@@ -107,8 +107,9 @@ public class DemographicController {
 
         public static AgeGroup parse(String text) {
             String[] tokens = text.replace(",","").split(" ");
-            int lower =  Integer.parseInt(tokens[0].trim());
-            int upper = Integer.parseInt(tokens[2].trim());
+            int censusAge =8;
+            int lower =  Integer.parseInt(tokens[0].trim()) + censusAge;
+            int upper = Integer.parseInt(tokens[2].trim()) + censusAge;
             int count = Integer.parseInt(tokens[4].trim());
             double percentage = Double.parseDouble(tokens[5].trim());
 
@@ -153,20 +154,19 @@ public class DemographicController {
 
         private void createGenerations(List<AgeGroup> ageGroups) {
             int total = ageGroups.stream().mapToInt(AgeGroup::getCount).sum();
-            int censusAge = 8;
 
             int melinialSum = ageGroups.stream()
-                    .filter(f -> f.getLower() > 22 - censusAge && f.getUpper() < 37 - censusAge)
+                    .filter(f -> f.getLower() >= 22 && f.getUpper() <= 37)
                     .mapToInt(AgeGroup::getCount)
                     .sum();
 
             int genXSum = ageGroups.stream()
-                    .filter(f -> f.getLower() > 38 - censusAge && f.getUpper() < 53 - censusAge)
+                    .filter(f -> f.getLower() >= 38 && f.getUpper() <= 53)
                     .mapToInt(AgeGroup::getCount)
                     .sum();
 
             int boomers = ageGroups.stream()
-                    .filter(f -> f.getLower() > 54 - censusAge && f.getUpper() < 72 - censusAge)
+                    .filter(f -> f.getLower() >= 54 && f.getUpper() <= 72)
                     .mapToInt(AgeGroup::getCount)
                     .sum();
 
