@@ -4,23 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HTMLParser;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -28,7 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.springframework.http.ResponseEntity.ok;
@@ -43,13 +34,9 @@ public class DemographicController {
             client.getOptions().setThrowExceptionOnScriptError(false);
             final HtmlPage page = client.getPage("https://factfinder.census.gov/bkmk/table/1.0/en/DEC/10_DP/DPDP1/8600000US" + zipCode);
             client.getOptions().setThrowExceptionOnScriptError(false);
-
-            System.out.println(client.getCookieManager().getCookies());
             UnexpectedPage stuff = client.getPage("https://factfinder.census.gov/tablerestful/tableServices/renderProductData?renderForMap=f&renderForChart=f&src=CF&log=t&_ts=55173673748");
 
             String theString = IOUtils.toString(stuff.getInputStream());
-//            System.out.println(page.getBody().asXml());
-//            System.out.println(theString);
             ObjectMapper mapper = new ObjectMapper();
             Map<String, LinkedHashMap> res = mapper.readValue(theString, Map.class);
             String response = res.get("ProductData").get("productDataTable").toString();
@@ -64,26 +51,6 @@ public class DemographicController {
                     .forEach( f-> ageGroups.add(AgeGroup.parse(f.text())));
 
             return ok(new AgeGroupRepsonse(ageGroups.subList(0,15)));
-//
-//            asList(response.split("<tbody>")).forEach(a->{
-//                System.out.println( "new:  " + a.replace("</tbody>",""));
-//                try {
-//                    DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-//                    builder.parse( new ByteArrayInputStream( a.getBytes() ));
-//                } catch (SAXException e) {
-//                    System.out.println( "This is where the exception is" );
-//                    System.out.println( a );
-//                    System.out.println( "This is the end of the exception." );
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } catch (ParserConfigurationException e) {
-//                    e.printStackTrace();
-//                }
-//            });
-//            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-//            builder.parse( new ByteArrayInputStream( res.get("ProductData").get("productDataTable").toString().getBytes() ));
-//            System.out.println(((LinkedHashMap)res.get("ProductData")).keySet());
         } catch (Exception e) {
             e.printStackTrace();
         }
