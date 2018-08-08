@@ -106,18 +106,11 @@ public class DemographicController {
         }
 
         public static AgeGroup parse(String text) {
-            System.out.println( "row:  " + text );
-
             String[] tokens = text.replace(",","").split(" ");
             int lower =  Integer.parseInt(tokens[0].trim());
             int upper = Integer.parseInt(tokens[2].trim());
             int count = Integer.parseInt(tokens[4].trim());
             double percentage = Double.parseDouble(tokens[5].trim());
-
-            System.out.println( lower );
-            System.out.println( upper );
-            System.out.println( count );
-            System.out.println( percentage );
 
             return new AgeGroup(lower, upper, count, percentage );
         }
@@ -160,11 +153,26 @@ public class DemographicController {
 
         private void createGenerations(List<AgeGroup> ageGroups) {
             int total = ageGroups.stream().mapToInt(AgeGroup::getCount).sum();
+            int censusAge = 8;
+
             int melinialSum = ageGroups.stream()
-                    .filter(f -> f.getLower() > 20 && f.getUpper() < 30)
+                    .filter(f -> f.getLower() > 22 - censusAge && f.getUpper() < 37 - censusAge)
                     .mapToInt(AgeGroup::getCount)
                     .sum();
-            generations.add( new Generation( "Mellinial", melinialSum, ((double)melinialSum/total)));
+
+            int genXSum = ageGroups.stream()
+                    .filter(f -> f.getLower() > 38 - censusAge && f.getUpper() < 53 - censusAge)
+                    .mapToInt(AgeGroup::getCount)
+                    .sum();
+
+            int boomers = ageGroups.stream()
+                    .filter(f -> f.getLower() > 54 - censusAge && f.getUpper() < 72 - censusAge)
+                    .mapToInt(AgeGroup::getCount)
+                    .sum();
+
+            generations.add( new Generation( "Millennial", melinialSum, ((double)melinialSum/total)));
+            generations.add( new Generation( "Generation X", genXSum, ((double)genXSum/total)));
+            generations.add( new Generation( "Boomers", boomers, ((double)boomers/total)));
         }
 
         public class Generation{
